@@ -1,39 +1,32 @@
-import tkinter as tk
-from tkinter import filedialog, messagebox
+import streamlit as st
 from PIL import Image
 import pytesseract
 
 # If you're on Windows, uncomment and set your Tesseract path here:
 # pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-def choose_file():
-    file_path = filedialog.askopenfilename(
-        filetypes=[("Image Files", "*.png *.jpg *.jpeg *.bmp *.tiff")]
-    )
-    if file_path:
-        extract_text(file_path)
-
-def extract_text(image_path):
+def extract_text(image):
     try:
-        img = Image.open(image_path)
-        text = pytesseract.image_to_string(img)
-        text_area.delete("1.0", tk.END)
-        text_area.insert(tk.END, text)
+        text = pytesseract.image_to_string(image)
+        return text
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to extract text:\n{e}")
+        st.error(f"Error: {e}")
+        return None
 
-# Create GUI window
-root = tk.Tk()
-root.title("Image to Text (OCR)")
+# Streamlit app layout
+st.title("Image to Text (OCR)")
 
-# Create GUI elements
-frame = tk.Frame(root, padx=20, pady=20)
-frame.pack()
+# File uploader widget
+uploaded_file = st.file_uploader("Choose an image...", type=["png", "jpg", "jpeg", "bmp", "tiff"])
 
-choose_btn = tk.Button(frame, text="Choose Image", command=choose_file, width=20)
-choose_btn.pack(pady=10)
+if uploaded_file is not None:
+    # Open the image
+    img = Image.open(uploaded_file)
+    st.image(img, caption="Uploaded Image", use_column_width=True)
 
-text_area = tk.Text(frame, height=20, width=60, wrap=tk.WORD)
-text_area.pack()
-
-root.mainloop()
+    # Extract text
+    if st.button("Extract Text"):
+        text = extract_text(img)
+        if text:
+            st.subheader("Extracted Text:")
+            st.text_area("Text", text, height=200)
