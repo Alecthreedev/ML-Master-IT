@@ -10,7 +10,7 @@ class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
 
 # Load the trained model with error handling
 try:
-    model = load_model('cifar10_model.h5')
+    model = load_model('model.h5')
 except TypeError as e:
     st.error(f"Error loading model: {e}")
     st.stop()
