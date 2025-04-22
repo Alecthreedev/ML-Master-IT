@@ -8,8 +8,12 @@ from PIL import Image
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                'dog', 'frog', 'horse', 'ship', 'truck']
 
-# Load the trained model
-model = load_model('model_cifar10.h5')
+# Load the trained model with error handling
+try:
+    model = load_model('model_cifar10.h5')
+except TypeError as e:
+    st.error(f"Error loading model: {e}")
+    st.stop()
 
 st.title("CIFAR-10 Image Classifier 🧠")
 st.write("Upload a 32x32 RGB image to classify it.")
