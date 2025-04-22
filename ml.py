@@ -1,32 +1,31 @@
 import streamlit as st
+import numpy as np
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing import image
 from PIL import Image
-import pytesseract
 
-# If you're on Windows, uncomment and set your Tesseract path here:
-# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# CIFAR-10 class names
+class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
+               'dog', 'frog', 'horse', 'ship', 'truck']
 
-def extract_text(image):
-    try:
-        text = pytesseract.image_to_string(image)
-        return text
-    except Exception as e:
-        st.error(f"Error: {e}")
-        return None
+# Load the trained model
+model = load_model('model_cifar10.h5')
 
-# Streamlit app layout
-st.title("Image to Text (OCR)")
+st.title("CIFAR-10 Image Classifier 🧠")
+st.write("Upload a 32x32 RGB image to classify it.")
 
-# File uploader widget
-uploaded_file = st.file_uploader("Choose an image...", type=["png", "jpg", "jpeg", "bmp", "tiff"])
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Open the image
-    img = Image.open(uploaded_file)
-    st.image(img, caption="Uploaded Image", use_column_width=True)
+    img = Image.open(uploaded_file).resize((32, 32)).convert('RGB')
+    st.image(img, caption='Uploaded Image', use_column_width=True)
 
-    # Extract text
-    if st.button("Extract Text"):
-        text = extract_text(img)
-        if text:
-            st.subheader("Extracted Text:")
-            st.text_area("Text", text, height=200)
+    # Preprocess image
+    img_array = image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
+
+    # Predict
+    predictions = model.predict(img_array)
+    predicted_class = class_names[np.argmax(predictions)]
+
+    st.markdown(f"### 🔍 Prediction: **{predicted_class}**")
